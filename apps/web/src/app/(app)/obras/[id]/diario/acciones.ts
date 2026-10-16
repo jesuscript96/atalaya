@@ -38,7 +38,11 @@ Tono de parte de obra: impersonal o en tercera persona, frases claras. Sin encab
 /** Redacta con IA una anotación dictada o escrita deprisa. Necesita ANTHROPIC_API_KEY en el entorno. */
 export async function mejorarTexto(texto: string): Promise<string> {
   if (!texto.trim()) throw new Error("No hay texto que mejorar");
-  if (!process.env.ANTHROPIC_API_KEY) throw new Error("Falta ANTHROPIC_API_KEY en .env.local para mejorar el texto con IA");
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error(process.env.NEXT_PUBLIC_ATALAYA_DEMO === "1"
+      ? "La redacción con IA no está activada en esta demo"
+      : "Falta ANTHROPIC_API_KEY en .env.local para mejorar el texto con IA");
+  }
   const client = new Anthropic();
   try {
     const r = await client.messages.create({

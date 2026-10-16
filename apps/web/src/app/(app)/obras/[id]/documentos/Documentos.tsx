@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
+import { DEMO } from "@/lib/demo/consulta";
 import { supabaseNavegador } from "@/lib/supabase/client";
 import type { Documento } from "@/lib/tipos";
 import { borrarDocumento, enlaceDescarga, procesar, registrarDocumento } from "./acciones";
@@ -38,6 +39,7 @@ export function Documentos({ obraId, documentos }: { obraId: string; documentos:
 
   async function subir(archivos: FileList | null) {
     if (!archivos?.length) return;
+    if (DEMO) { setError("En la demo no se suben ni procesan documentos nuevos: la obra ya está cargada."); return; }
     setError(null);
     const sb = supabaseNavegador();
     for (const f of Array.from(archivos)) {
@@ -94,6 +96,7 @@ export function Documentos({ obraId, documentos }: { obraId: string; documentos:
                   <button className="text-left font-semibold hover:underline" onClick={async () => {
                     const u = await enlaceDescarga(d.ruta);
                     if (u) window.open(u, "_blank");
+                    else if (DEMO) alert("En la demo no se pueden descargar los documentos originales.");
                   }}>{d.nombre}</button>
                   <div className="muted text-xs">{new Date(d.created_at).toLocaleString("es-ES")} · {((d.tamano ?? 0) / 1048576).toFixed(1)} MB</div>
                   {d.estado === "error" && <p className="text-sm text-[var(--late)] mt-1">{d.mensaje}</p>}
@@ -102,12 +105,12 @@ export function Documentos({ obraId, documentos }: { obraId: string; documentos:
                 <td className="capitalize">{d.tipo}</td>
                 <td><span className={`chip ${ESTADO[d.estado][1]}`}>{ESTADO[d.estado][0]}</span></td>
                 <td className="no-print text-right whitespace-nowrap">
-                  {(d.tipo === "planos" || d.tipo === "presupuesto") && d.estado !== "procesando" && (
+                  {!DEMO && (d.tipo === "planos" || d.tipo === "presupuesto") && d.estado !== "procesando" && (
                     <button className="btn btn-sm" onClick={() => start(() => procesar(obraId, d.id))}>Reprocesar</button>
                   )}{" "}
-                  <button className="btn btn-sm btn-danger" onClick={() => {
+                  {!DEMO && <button className="btn btn-sm btn-danger" onClick={() => {
                     if (confirm(`¿Borrar «${d.nombre}»? Lo ya importado (hojas, partidas…) se mantiene.`)) start(() => borrarDocumento(obraId, d.id));
-                  }}>Borrar</button>
+                  }}>Borrar</button>}
                 </td>
               </tr>
             ))}

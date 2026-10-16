@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Marca } from "@/components/Marca";
+import { DEMO } from "@/lib/demo/consulta";
 import { salir } from "../login/actions";
+import { ReiniciarDemo } from "./ReiniciarDemo";
 
 export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
@@ -10,9 +12,11 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
         <nav className="flex-1 text-sm">
           <Link href="/" className="hover:text-white">Obras</Link>
         </nav>
-        <form action={salir}>
-          <button className="text-sm hover:text-white">Salir</button>
-        </form>
+        {DEMO ? <ReiniciarDemo /> : (
+          <form action={salir}>
+            <button className="text-sm hover:text-white">Salir</button>
+          </form>
+        )}
       </header>
       <div className="flex-1 flex flex-col">{children}</div>
     </>

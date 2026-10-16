@@ -95,3 +95,24 @@ Web en Vercel (raíz `apps/web`), Supabase gestionado (Postgres + Storage) y el 
 3D, capturas e IA con fotos, suministros, subcontratas, control económico, cambios, calidad, entregas, integraciones,
 avisos y fotos. Siguientes pasos naturales: instalaciones (puntos y tramos), versiones de planos, asistencia con IA para
 vincular partidas y leer planos no vectoriales.
+
+## Demo pública (Vercel, sin login)
+
+Con `NEXT_PUBLIC_ATALAYA_DEMO=1` la app no usa Supabase ni pide acceso: lee una copia fija de una obra
+(`apps/web/demo-privado/obra.json` y las imágenes de las hojas en `apps/web/public/demo/`) y guarda los cambios de la
+visita en un registro de Vercel Blob privado (`BLOB_READ_WRITE_TOKEN`), para que todas las instancias del servidor vean
+lo mismo. «Restablecer», en la cabecera, vuelve al estado inicial. El código está en `apps/web/src/lib/demo/`.
+
+La copia de la obra **no está en el repositorio** (son datos de un cliente). Para publicar la demo:
+
+```bash
+scripts/exportar-demo.sh                        # base local → demo-privado/ y public/demo/
+cd apps/web
+vercel pull --yes --environment=production
+mv .env.local ../.env.local.aparte              # que no entren claves locales en la compilación
+vercel build --prod && vercel deploy --prebuilt --prod
+mv ../.env.local.aparte .env.local
+```
+
+El proyecto de Vercel `atalaya` no está conectado a GitHub a propósito: una compilación desde el repositorio no
+tendría la copia de la obra.
